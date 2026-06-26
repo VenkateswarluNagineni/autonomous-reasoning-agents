@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build: .
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - USE_MOCK_S3=true
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: rq worker --url redis://redis:6379/0 document_ingestion
+    volumes:
+      - .:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - USE_MOCK_S3=true
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  redis_data:
