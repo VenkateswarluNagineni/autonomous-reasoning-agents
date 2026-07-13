@@ -1,5 +1,4 @@
-from typing import Any, Dict, List, Optional, TypedDict
-from pydantic import BaseModel, Field
+from typing import Any, TypedDict
 
 
 class AgentState(TypedDict):
@@ -7,10 +6,10 @@ class AgentState(TypedDict):
     LangGraph State dictionary tracking multi-step reasoning cycles.
     """
     user_query: str
-    reasoning_plan: List[str]
+    reasoning_plan: list[str]
     retrieved_context: str
-    extracted_domain_entities: Dict[str, Any]
+    extracted_domain_entities: dict[str, Any]
     draft_response: str
     verification_passed: bool
     iterations: int
-    error: Optional[str]
+    error: str | None

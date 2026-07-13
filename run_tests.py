@@ -1,9 +1,11 @@
 import sys
+
 from tests.test_pipeline import (
+    test_langgraph_reasoning_agent,
     test_specialized_parsers_fallback,
     test_vector_store_indexing,
-    test_langgraph_reasoning_agent
 )
+
 
 def main():
     print("=" * 60)

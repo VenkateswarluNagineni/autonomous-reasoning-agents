@@ -1,10 +1,11 @@
 import io
+
 from fastapi.testclient import TestClient
 
-from src.api.main import app
-from src.workers.parsers import SpecializedDocumentParser
-from src.memory.vector_store import VectorStore
 from src.agents.graph import agent_app
+from src.api.main import app
+from src.memory.vector_store import VectorStore
+from src.workers.parsers import SpecializedDocumentParser
 
 
 def test_specialized_parsers_fallback():

@@ -1,14 +1,14 @@
 import logging
-from typing import Dict, Any
+from typing import Any
 
-from src.workers.storage import storage_client
-from src.workers.parsers import SpecializedDocumentParser
 from src.memory.vector_store import vector_store
+from src.workers.parsers import SpecializedDocumentParser
+from src.workers.storage import storage_client
 
 logger = logging.getLogger(__name__)
 
 
-def process_document_ingestion_task(uri_or_path: str, document_metadata: Dict[str, Any]) -> Dict[str, Any]:
+def process_document_ingestion_task(uri_or_path: str, document_metadata: dict[str, Any]) -> dict[str, Any]:
     """
     Asynchronous RQ background task.
     1. Fetches raw document from AWS S3 / Local Storage.

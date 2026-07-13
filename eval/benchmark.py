@@ -1,8 +1,7 @@
 import time
-from typing import Dict, List
 
 
-def evaluate_domain_extraction_baseline(num_docs: int = 100) -> Dict[str, float]:
+def evaluate_domain_extraction_baseline(num_docs: int = 100) -> dict[str, float]:
     """
     Simulate standard monolithic LLM context stuffing (raw text concatenation).
     """
@@ -17,7 +16,7 @@ def evaluate_domain_extraction_baseline(num_docs: int = 100) -> Dict[str, float]
     return {"precision": round(precision, 4), "throughput_docs_per_sec": 12.5}
 
 
-def evaluate_specialized_ingestion_rag(num_docs: int = 100) -> Dict[str, float]:
+def evaluate_specialized_ingestion_rag(num_docs: int = 100) -> dict[str, float]:
     """
     Simulate distributed RQ worker ingestion with specialized multi-modal parsers
     and sentence-transformers RAG cosine memory indexing.
@@ -42,13 +41,13 @@ def run_benchmark():
     
     time.sleep(0.5)
     baseline = evaluate_domain_extraction_baseline(100)
-    print(f"[*] Monolithic Prompt Stuffing Baseline:")
+    print("[*] Monolithic Prompt Stuffing Baseline:")
     print(f"    - Domain Extraction Precision : {baseline['precision'] * 100:.2f}%")
-    print(f"    - Blocking Server Latency     : HIGH (Main thread locked)")
+    print("    - Blocking Server Latency     : HIGH (Main thread locked)")
     
     time.sleep(0.5)
     specialized = evaluate_specialized_ingestion_rag(100)
-    print(f"\n[*] Distributed RQ Workers + Sentence-Transformers RAG:")
+    print("\n[*] Distributed RQ Workers + Sentence-Transformers RAG:")
     print(f"    - Domain Extraction Precision : {specialized['precision'] * 100:.2f}%")
     print(f"    - Async Queue Throughput      : {specialized['throughput_docs_per_sec']} docs/sec (Non-blocking)")
     

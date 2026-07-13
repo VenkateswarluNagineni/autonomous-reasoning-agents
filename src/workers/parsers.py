@@ -1,6 +1,5 @@
 import io
 import logging
-from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +11,7 @@ class SpecializedDocumentParser:
     """
 
     @classmethod
-    def parse_pdf(cls, stream: io.BytesIO) -> List[Tuple[str, Dict[str, str]]]:
+    def parse_pdf(cls, stream: io.BytesIO) -> list[tuple[str, dict[str, str]]]:
         """
         Extract text from unstructured PDF documents page by page.
         """
@@ -38,7 +37,7 @@ class SpecializedDocumentParser:
         return chunks
 
     @classmethod
-    def parse_spreadsheet(cls, stream: io.BytesIO) -> List[Tuple[str, Dict[str, str]]]:
+    def parse_spreadsheet(cls, stream: io.BytesIO) -> list[tuple[str, dict[str, str]]]:
         """
         Decompose spreadsheet worksheets into structured narrative blocks.
         """
@@ -68,7 +67,7 @@ class SpecializedDocumentParser:
         return chunks
 
     @classmethod
-    def parse_slide_deck(cls, stream: io.BytesIO) -> List[Tuple[str, Dict[str, str]]]:
+    def parse_slide_deck(cls, stream: io.BytesIO) -> list[tuple[str, dict[str, str]]]:
         """
         Extract titles, body text, and speaker notes from executive slide decks.
         """
@@ -104,7 +103,7 @@ class SpecializedDocumentParser:
         return chunks
 
     @classmethod
-    def chunk_and_parse(cls, filename: str, stream: io.BytesIO) -> List[Tuple[str, Dict[str, str]]]:
+    def chunk_and_parse(cls, filename: str, stream: io.BytesIO) -> list[tuple[str, dict[str, str]]]:
         """
         Route stream to specialized parser based on file extension.
         """

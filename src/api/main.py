@@ -1,12 +1,13 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
+
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
 from pydantic import BaseModel, Field
 
-from src.config import settings
-from src.workers.storage import storage_client
-from src.workers.ingest_tasks import process_document_ingestion_task
 from src.agents.graph import agent_app
+from src.config import settings
+from src.workers.ingest_tasks import process_document_ingestion_task
+from src.workers.storage import storage_client
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("AutonomousReasoningAPI")
@@ -14,7 +15,10 @@ logger = logging.getLogger("AutonomousReasoningAPI")
 app = FastAPI(
     title="Autonomous Memory & Reasoning Agents API",
     version="1.0.0",
-    description="Distributed asynchronous multi-step reasoning agent server with LangGraph and RQ Workers."
+    description=(
+        "Distributed asynchronous multi-step reasoning agent server "
+        "with LangGraph and RQ Workers."
+    ),
 )
 
 # Global Redis Queue instance
@@ -26,11 +30,18 @@ try:
     rq_queue = Queue(settings.rq_queue_name, connection=redis_conn)
     logger.info("Successfully connected to Redis RQ background queue.")
 except Exception as e:
-    logger.warning(f"Redis unavailable ({e}). Background ingestion jobs will execute synchronously in fallback mode.")
+    logger.warning(
+        f"Redis unavailable ({e}). Background ingestion jobs will execute synchronously in fallback mode."
+    )
 
 
 class QueryRequest(BaseModel):
-    user_query: str = Field(..., example="Analyze Q3 cloud financial spreadsheet revenue trends.")
+    user_query: str = Field(
+        ...,
+        json_schema_extra={
+            "example": "Analyze Q3 cloud financial spreadsheet revenue trends."
+        },
+    )
 
 
 class QueryResponse(BaseModel):
@@ -54,15 +65,17 @@ async def health_check():
 
 @app.post("/api/v1/ingest", status_code=status.HTTP_202_ACCEPTED)
 async def submit_document_ingestion(
-    file: Optional[UploadFile] = File(None),
-    document_uri: Optional[str] = None
-) -> Dict[str, Any]:
+    file: UploadFile | None = File(None),  # noqa: B008
+    document_uri: str | None = None
+) -> dict[str, Any]:
     """
     Non-blocking document ingestion endpoint. Enqueues heavy PDF/Spreadsheet
     parsing and embedding generation to distributed RQ workers.
     """
     if not file and not document_uri:
-        raise HTTPException(status_code=400, detail="Must provide either file upload or document_uri.")
+        raise HTTPException(
+            status_code=400, detail="Must provide either file upload or document_uri."
+        )
 
     if file:
         content = await file.read()
@@ -85,7 +98,7 @@ async def submit_document_ingestion(
 
 
 @app.get("/api/v1/jobs/{job_id}", status_code=status.HTTP_200_OK)
-async def get_job_status(job_id: str) -> Dict[str, Any]:
+async def get_job_status(job_id: str) -> dict[str, Any]:
     """Poll asynchronous background RQ job status."""
     if not rq_queue:
         raise HTTPException(status_code=503, detail="Redis RQ background workers not connected.")
@@ -100,7 +113,7 @@ async def get_job_status(job_id: str) -> Dict[str, Any]:
             "exc_info": job.exc_info
         }
     except Exception as e:
-        raise HTTPException(status_code=404, detail=f"Job {job_id} not found: {e}")
+        raise HTTPException(status_code=404, detail=f"Job {job_id} not found: {e}") from e
 
 
 @app.post("/api/v1/query", response_model=QueryResponse)
@@ -126,4 +139,4 @@ async def query_reasoning_agent(request: QueryRequest) -> QueryResponse:
         )
     except Exception as e:
         logger.error(f"LangGraph execution failure: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Agent inference failure: {e}")
+        raise HTTPException(status_code=500, detail=f"Agent inference failure: {e}") from e

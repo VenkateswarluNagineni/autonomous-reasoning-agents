@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # AWS Storage
     aws_region: str = "us-east-1"
     aws_access_key_id: str = "mock_key"
-    aws_secret_access_key: str = "mock_secret"
+    aws_secret_access_key: str = "mock_secret"  # noqa: S105
     aws_s3_bucket: str = "enterprise-document-ingestion-corpus"
     use_mock_s3: bool = True
     local_storage_dir: str = "./data/raw_documents"

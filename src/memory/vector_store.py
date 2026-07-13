@@ -1,7 +1,8 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+
 import numpy as np
 
 try:
@@ -21,12 +22,12 @@ class VectorStore:
     and exact cosine similarity search.
     """
 
-    def __init__(self, index_path: Optional[str] = None):
+    def __init__(self, index_path: str | None = None):
         self.index_path = Path(index_path or settings.vector_index_path)
         self.dimension = settings.vector_dimension
-        self.vectors: List[np.ndarray] = []
-        self.documents: List[str] = []
-        self.metadatas: List[Dict[str, Any]] = []
+        self.vectors: list[np.ndarray] = []
+        self.documents: list[str] = []
+        self.metadatas: list[dict[str, Any]] = []
         self._model = None
         self._load_index()
 
@@ -37,11 +38,13 @@ class VectorStore:
                 logger.info(f"Loading SentenceTransformer model: {settings.embedding_model_name}")
                 self._model = SentenceTransformer(settings.embedding_model_name)
             else:
-                logger.warning("sentence-transformers not installed or unavailable. Using deterministic hash fallback.")
+                logger.warning(
+                    "sentence-transformers not installed or unavailable. Using deterministic hash fallback."
+                )
                 self._model = "fallback"
         return self._model
 
-    def encode(self, texts: List[str]) -> np.ndarray:
+    def encode(self, texts: list[str]) -> np.ndarray:
         """
         Encode text strings into high-dimensional vector embeddings.
         """
@@ -55,7 +58,7 @@ class VectorStore:
         embeddings = self.model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
         return embeddings
 
-    def add_texts(self, texts: List[str], metadatas: Optional[List[Dict[str, Any]]] = None) -> List[int]:
+    def add_texts(self, texts: list[str], metadatas: list[dict[str, Any]] | None = None) -> list[int]:
         """
         Embed and index a list of text chunks with optional metadata.
         """
@@ -69,7 +72,7 @@ class VectorStore:
         start_id = len(self.documents)
         ids = []
 
-        for i, (text, emb, meta) in enumerate(zip(texts, embeddings, metadatas)):
+        for i, (text, emb, meta) in enumerate(zip(texts, embeddings, metadatas, strict=True)):
             self.documents.append(text)
             self.vectors.append(emb)
             self.metadatas.append(meta)
@@ -79,7 +82,9 @@ class VectorStore:
         logger.info(f"Indexed {len(texts)} chunks into VectorStore.")
         return ids
 
-    def similarity_search(self, query: str, top_k: int = 5, filter_dict: Optional[Dict[str, Any]] = None) -> List[Tuple[str, float, Dict[str, Any]]]:
+    def similarity_search(
+        self, query: str, top_k: int = 5, filter_dict: dict[str, Any] | None = None
+    ) -> list[tuple[str, float, dict[str, Any]]]:
         """
         Execute cosine similarity search for a query against stored document vectors.
         Returns list of (document_text, similarity_score, metadata).
@@ -135,7 +140,7 @@ class VectorStore:
         """Load persisted index from disk if present."""
         if self.index_path.exists():
             try:
-                with open(self.index_path, "r", encoding="utf-8") as f:
+                with open(self.index_path, encoding="utf-8") as f:
                     data = json.load(f)
                 self.documents = data.get("documents", [])
                 self.metadatas = data.get("metadatas", [])

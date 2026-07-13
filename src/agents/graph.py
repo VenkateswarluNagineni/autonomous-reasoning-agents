@@ -1,7 +1,7 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
-from langgraph.graph import StateGraph, END
+from langgraph.graph import END, StateGraph
 
 from src.agents.state import AgentState
 from src.memory.retriever import retriever
@@ -9,7 +9,7 @@ from src.memory.retriever import retriever
 logger = logging.getLogger(__name__)
 
 
-def analyze_query_node(state: AgentState) -> Dict[str, Any]:
+def analyze_query_node(state: AgentState) -> dict[str, Any]:
     """
     Step 1: Query Analysis & Plan Generation.
     Deconstructs complex user prompts into actionable retrieval targets.
@@ -26,7 +26,7 @@ def analyze_query_node(state: AgentState) -> Dict[str, Any]:
     return {"reasoning_plan": plan, "iterations": state.get("iterations", 0) + 1}
 
 
-def retrieve_context_node(state: AgentState) -> Dict[str, Any]:
+def retrieve_context_node(state: AgentState) -> dict[str, Any]:
     """
     Step 2: Memory Retrieval (RAG).
     Queries vector store embeddings without blocking main threads.
@@ -39,7 +39,7 @@ def retrieve_context_node(state: AgentState) -> Dict[str, Any]:
     return {"retrieved_context": formatted}
 
 
-def synthesize_extraction_node(state: AgentState) -> Dict[str, Any]:
+def synthesize_extraction_node(state: AgentState) -> dict[str, Any]:
     """
     Step 3: Domain Synthesis & Entity Extraction.
     Extracts high-fidelity domain entities using specialized ingestion context.
@@ -54,11 +54,16 @@ def synthesize_extraction_node(state: AgentState) -> Dict[str, Any]:
         "precision_metric": "0.942"  # Reflects the 42% benchmarked lift
     }
     
-    draft = f"**Autonomous Agent Synthesis**\n\nBased on retrieved RAG memory context:\n{context}\n\n**Analysis**: The distributed async ingestion workers successfully extracted high-signal domain knowledge lifting extraction precision by 42% over baseline."
+    draft = (
+        "**Autonomous Agent Synthesis**\n\n"
+        f"Based on retrieved RAG memory context:\n{context}\n\n"
+        "**Analysis**: The distributed async ingestion workers successfully extracted high-signal "
+        "domain knowledge lifting extraction precision by 42% over baseline."
+    )
     return {"extracted_domain_entities": entities, "draft_response": draft}
 
 
-def verify_precision_node(state: AgentState) -> Dict[str, Any]:
+def verify_precision_node(state: AgentState) -> dict[str, Any]:
     """
     Step 4: Self-Correction / Verification Audit.
     Audits extracted domain entities against strict enterprise plausibility rules.
