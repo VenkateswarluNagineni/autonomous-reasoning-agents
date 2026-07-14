@@ -16,7 +16,7 @@ def analyze_query_node(state: AgentState) -> dict[str, Any]:
     """
     query = state.get("user_query", "")
     logger.info(f"Node [AnalyzeQuery]: Planning multi-step reasoning for '{query}'")
-    
+
     plan = [
         f"Identify domain entity keywords in '{query}'",
         "Query sentence-transformers RAG memory index for high-confidence chunks",
@@ -33,7 +33,7 @@ def retrieve_context_node(state: AgentState) -> dict[str, Any]:
     """
     query = state.get("user_query", "")
     logger.info(f"Node [RetrieveContext]: Querying vector store for '{query}'")
-    
+
     contexts = retriever.retrieve(query, top_k=3)
     formatted = retriever.format_as_prompt_context(contexts)
     return {"retrieved_context": formatted}
@@ -47,13 +47,13 @@ def synthesize_extraction_node(state: AgentState) -> dict[str, Any]:
     context = state.get("retrieved_context", "")
     query = state.get("user_query", "")
     logger.info("Node [SynthesizeExtraction]: Synthesizing domain answer from context")
-    
+
     entities = {
         "primary_topic": query,
         "context_length": len(context),
         "precision_metric": "0.942"  # Reflects the 42% benchmarked lift
     }
-    
+
     draft = (
         "**Autonomous Agent Synthesis**\n\n"
         f"Based on retrieved RAG memory context:\n{context}\n\n"
@@ -71,7 +71,7 @@ def verify_precision_node(state: AgentState) -> dict[str, Any]:
     entities = state.get("extracted_domain_entities", {})
     iterations = state.get("iterations", 1)
     logger.info(f"Node [VerifyPrecision]: Auditing extraction cycle {iterations}")
-    
+
     # Simulate verification pass condition
     passed = iterations >= 1 and bool(entities)
     return {"verification_passed": passed}
@@ -91,19 +91,19 @@ def build_reasoning_graph():
     Compile and return the executable LangGraph StateGraph.
     """
     workflow = StateGraph(AgentState)
-    
+
     # Register graph nodes
     workflow.add_node("analyze", analyze_query_node)
     workflow.add_node("retrieve", retrieve_context_node)
     workflow.add_node("synthesize", synthesize_extraction_node)
     workflow.add_node("verify", verify_precision_node)
-    
+
     # Define state transitions
     workflow.set_entry_point("analyze")
     workflow.add_edge("analyze", "retrieve")
     workflow.add_edge("retrieve", "synthesize")
     workflow.add_edge("synthesize", "verify")
-    
+
     # Conditional cyclical loop
     workflow.add_conditional_edges(
         "verify",
@@ -113,7 +113,7 @@ def build_reasoning_graph():
             "end": END
         }
     )
-    
+
     return workflow.compile()
 
 

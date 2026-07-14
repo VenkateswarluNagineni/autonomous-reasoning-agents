@@ -44,7 +44,7 @@ def test_langgraph_reasoning_agent():
 def test_fastapi_endpoints():
     """Verify non-blocking API endpoints."""
     client = TestClient(app)
-    
+
     # Health check
     health = client.get("/health")
     assert health.status_code == 200

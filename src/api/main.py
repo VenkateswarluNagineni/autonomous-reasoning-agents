@@ -102,7 +102,7 @@ async def get_job_status(job_id: str) -> dict[str, Any]:
     """Poll asynchronous background RQ job status."""
     if not rq_queue:
         raise HTTPException(status_code=503, detail="Redis RQ background workers not connected.")
-    
+
     from rq.job import Job
     try:
         job = Job.fetch(job_id, connection=rq_queue.connection)
@@ -127,7 +127,7 @@ async def query_reasoning_agent(request: QueryRequest) -> QueryResponse:
         "iterations": 0
     }
     logger.info(f"Invoking LangGraph reasoning pipeline for query: {request.user_query}")
-    
+
     try:
         final_state = agent_app.invoke(initial_state)
         return QueryResponse(

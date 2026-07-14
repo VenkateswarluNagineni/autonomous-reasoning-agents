@@ -80,7 +80,7 @@ class SpecializedDocumentParser:
                 for shape in slide.shapes:
                     if hasattr(shape, "text") and shape.text:
                         texts.append(shape.text.strip())
-                
+
                 # Extract speaker notes if present
                 notes_text = ""
                 if slide.has_notes_slide and slide.notes_slide.notes_text_frame:
